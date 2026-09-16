@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dino Rawr</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --forest-dark:#1B4332;
+    --forest-mid:#2D6A4F;
+    --forest-light:#74C69D;
+    --earth:#8B5E34;
+    --earth-dark:#4E3319;
+    --water:#2A6F97;
+    --water-light:#61A5C2;
+    --orange:#F4762A;
+    --orange-dark:#C85A1A;
+    --yellow:#FFC93C;
+    --ink:#132018;
+    --paper:#FBF7EC;
+    --danger:#D62828;
+    --danger-dark:#9E1B1B;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    font-family:'Nunito',sans-serif;
+    background:var(--forest-dark);
+    color:var(--ink);
+    overflow-x:hidden;
+  }
+  #app{
+    position:relative;
+    width:100%;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+  }
+  h1,h2,h3,.display{
+    font-family:'Baloo 2',sans-serif;
+    margin:0;
+  }
+  button{
+    font-family:'Baloo 2',sans-serif;
+    cursor:pointer;
+    border:none;
+    outline:none;
+  }
+  button:focus-visible, a:focus-visible{
+    outline:3px solid var(--yellow);
+    outline-offset:2px;
+  }
+  .btn{
+    background:var(--orange);
+    color:var(--paper);
+    font-size:1.05rem;
+    font-weight:700;
+    padding:14px 30px;
+    border-radius:16px;
+    box-shadow:0 5px 0 var(--orange-dark);
+    transition:transform .08s ease;
+  }
+  .btn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--orange-dark);}
+  .btn.secondary{
+    background:var(--water-light);
+    box-shadow:0 5px 0 #3C7E9E;
+  }
+  .btn.secondary:active{box-shadow:0 1px 0 #3C7E9E;}
+  .btn.ghost{
+    background:transparent;
+    color:var(--paper);
+    box-shadow:none;
+    border:2px solid rgba(251,247,236,.6);
+    padding:12px 26px;
+  }
+  .btn.ghost:active{transform:translateY(2px);}
+  .btn:disabled{
+    opacity:.4;
+    cursor:not-allowed;
+    box-shadow:none;
+    transform:none;
+  }
+  .btn-row{display:flex;gap:14px;flex-wrap:wrap;}
+
+  .sound-toggle{
+    position:fixed;top:14px;right:14px;z-index:60;
+    background:rgba(0,0,0,.35);color:var(--paper);
+    width:42px;height:42px;border-radius:50%;
+    font-size:1.1rem;display:flex;align-items:center;justify-content:center;
+  }
+
+  /* ---------- START SCREEN ---------- */
+  .scene-start{
+    position:relative;
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-end;
+    min-height:100vh;
+    padding:40px 24px 56px;
+    overflow:hidden;
+    background:linear-gradient(180deg,#8FD3C0 0%,#5FB4A4 30%,var(--forest-mid) 62%,var(--forest-dark) 100%);
+  }
+  .sun{
+    position:absolute;top:8%;right:12%;width:120px;height:120px;border-radius:50%;
+    background:radial-gradient(circle at 35% 35%, #FFE9A6, var(--yellow) 70%);
+    box-shadow:0 0 60px 20px rgba(255,201,60,.35);
+  }
+  .parallax-hill{
+    position:absolute;bottom:0;left:0;width:100%;
+  }
+  .hill-back{fill:var(--forest-mid);opacity:.85;}
+  .hill-front{fill:var(--forest-dark);}
+  .logo-wrap{
+    position:relative;z-index:3;
+    text-align:center;
+    margin-bottom:auto;
+    margin-top:8vh;
+    animation:riseIn .9s cubic-bezier(.2,.9,.25,1) both;
+  }
+  @keyframes riseIn{
+    from{opacity:0;transform:translateY(24px) scale(.96);}
+    to{opacity:1;transform:translateY(0) scale(1);}
+  }
+  .logo-title{
+    font-size:clamp(2.6rem,9vw,4.6rem);
+    font-weight:800;
+    color:var(--paper);
+    text-shadow:0 6px 0 var(--earth-dark), 0 10px 18px rgba(0,0,0,.35);
+    letter-spacing:1px;
+  }
+  .logo-title span{color:var(--yellow);}
+  .logo-sub{
+    font-family:'Nunito',sans-serif;
+    color:rgba(251,247,236,.85);
+    font-weight:700;
+    letter-spacing:2px;
+    margin-top:6px;
+    font-size:.95rem;
+  }
+  .hero-dino{
+    position:relative;z-index:2;
+    width:min(78vw,360px);
+    animation:sway 3.2s ease-in-out infinite;
+    transform-origin:70% 90%;
+  }
+  @keyframes sway{
+    0%,100%{transform:rotate(-1.5deg);}
+    50%{transform:rotate(1.5deg);}
+  }
+  .start-actions{position:relative;z-index:3;margin-top:28px;}
+
+  /* ---------- generic screen shell ---------- */
+  .screen{
+    flex:1;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    padding:22px 20px 40px;
+  }
+  .screen-header{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-bottom:18px;
+  }
+  .screen-title{color:var(--paper);font-size:1.5rem;font-weight:700;}
+  .card{
+    background:var(--paper);
+    border-radius:20px;
+    padding:18px;
+    box-shadow:0 6px 0 rgba(0,0,0,.15);
+  }
+
+  /* ---------- SELECT DINO ---------- */
+  .scene-select{background:linear-gradient(180deg,var(--forest-mid),var(--forest-dark));}
+  .dino-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:16px;
+    margin-top:6px;
+  }
+  .dino-card{
+    background:var(--paper);
+    border-radius:22px;
+    padding:16px;
+    text-align:center;
+    border:4px solid transparent;
+    transition:border-color .15s ease, transform .15s ease;
+    box-shadow:0 6px 0 rgba(0,0,0,.15);
+  }
+  .dino-card.selected{border-color:var(--yellow);transform:translateY(-4px);}
+  .dino-card h3{font-size:1.25rem;margin-bottom:2px;}
+  .dino-card .species{color:var(--earth);font-weight:700;font-size:.85rem;margin-bottom:8px;}
+  .dino-card p.desc{font-size:.88rem;line-height:1.35;color:#3d4f43;margin:10px 0;}
+  .stat-row{display:flex;justify-content:space-between;font-size:.78rem;font-weight:700;color:var(--forest-dark);margin-top:4px;}
+  .stat-bar-bg{background:#e4ddc9;border-radius:6px;height:8px;overflow:hidden;margin:3px 0 8px;}
+  .stat-bar-fill{height:100%;border-radius:6px;}
+  .select-footer{margin-top:20px;display:flex;justify-content:center;}
+
+  /* ---------- INTRO ---------- */
+  .scene-intro{
+    background:radial-gradient(ellipse at 50% 0%, var(--forest-mid), var(--forest-dark) 70%);
+    align-items:center;
+    text-align:center;
+  }
+  .intro-card{max-width:520px;margin:auto;}
+  .intro-card p{line-height:1.6;font-size:1.02rem;color:#33402f;margin:12px 0;}
+
+  /* ---------- MAP ---------- */
+  .scene-map{background:linear-gradient(180deg,#3E7C56,var(--forest-dark));}
+  .zone-list{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+    gap:14px;margin-top:8px;
+  }
+  .zone-tile{
+    background:var(--paper);border-radius:20px;padding:16px;position:relative;
+    box-shadow:0 6px 0 rgba(0,0,0,.15);
+  }
+  .zone-tile.locked{opacity:.55;}
+  .zone-tile .zone-num{
+    position:absolute;top:-10px;left:-10px;
+    background:var(--forest-dark);color:var(--paper);
+    width:30px;height:30px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-weight:800;font-size:.9rem;border:3px solid var(--yellow);
+  }
+  .zone-tile h3{font-size:1.1rem;}
+  .zone-tile .mission-line{font-size:.85rem;color:var(--water);font-weight:700;margin-top:4px;}
+  .zone-status{
+    display:inline-block;margin-top:10px;font-size:.75rem;font-weight:800;
+    padding:4px 10px;border-radius:20px;
+  }
+  .status-locked{background:#ddd6c2;color:#7a7259;}
+  .status-unlocked{background:var(--yellow);color:var(--earth-dark);}
+  .status-done{background:var(--forest-light);color:var(--forest-dark);}
+  .hud{
+    display:flex;gap:16px;align-items:center;color:var(--paper);font-weight:700;
+    margin-top:14px;font-size:.9rem;flex-wrap:wrap;
+  }
+  .hud .pill{background:rgba(0,0,0,.25);padding:6px 12px;border-radius:20px;display:flex;gap:6px;align-items:center;}
+
+  /* ---------- ZONE / EXPLORE ---------- */
+  .scene-zone{position:relative;}
+  .zone-bg{
+    position:absolute;inset:0;z-index:0;
+  }
+  .zone-content{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;}
+  .status-bars{display:flex;flex-direction:column;gap:8px;margin-bottom:10px;}
+  .bar-label{display:flex;justify-content:space-between;font-size:.8rem;color:var(--paper);font-weight:700;margin-bottom:2px;}
+  .bar-bg{background:rgba(0,0,0,.35);border-radius:10px;height:16px;overflow:hidden;border:2px solid rgba(255,255,255,.3);}
+  .bar-fill{height:100%;transition:width .4s ease;}
+  .fill-hp{background:linear-gradient(90deg,#ff8a5c,var(--danger));}
+  .fill-progress{background:linear-gradient(90deg,var(--yellow),var(--orange));}
+  .fill-enemy{background:linear-gradient(90deg,#c86bff,#7b2ff7);}
+
+  .zone-stage{
+    flex:1;border-radius:20px;background:rgba(0,0,0,.18);
+    display:flex;align-items:center;justify-content:center;
+    min-height:180px;position:relative;overflow:hidden;margin:8px 0 14px;
+  }
+  .player-token{width:min(46vw,150px);transition:transform .25s ease;}
+  .log-line{
+    color:var(--paper);background:rgba(0,0,0,.25);border-radius:12px;
+    padding:8px 12px;font-size:.85rem;font-weight:600;min-height:1.4em;margin-bottom:10px;
+  }
+  .item-row{margin-bottom:10px;flex-wrap:wrap;}
+  .item-btn{padding:8px 14px;font-size:.78rem;}
+  .action-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;}
+  .action-grid .btn{width:100%;padding:14px 8px;font-size:.92rem;}
+  .mission-banner{
+    background:var(--yellow);color:var(--earth-dark);font-weight:800;
+    padding:8px 14px;border-radius:14px;font-size:.85rem;margin-bottom:10px;
+    display:inline-block;
+  }
+
+  /* ---------- COMBAT ---------- */
+  .combat-vs{
+    display:flex;align-items:center;justify-content:space-around;gap:10px;margin:10px 0 16px;
+  }
+  .combatant{text-align:center;flex:1;position:relative;}
+  .combatant img,.combatant svg{width:min(28vw,110px);}
+  .combatant h4{color:var(--paper);font-size:.95rem;margin-bottom:4px;}
+  .float-dmg{
+    position:absolute;top:6%;left:50%;transform:translate(-50%,0);
+    font-family:'Baloo 2',sans-serif;font-weight:800;font-size:1.3rem;
+    animation:floatUp .9s ease forwards;pointer-events:none;
+    text-shadow:0 2px 4px rgba(0,0,0,.5);
+  }
+  @keyframes floatUp{
+    0%{opacity:1;transform:translate(-50%,0);}
+    100%{opacity:0;transform:translate(-50%,-42px);}
+  }
+  .shake{animation:shakeScreen .4s;}
+  @keyframes shakeScreen{
+    10%,90%{transform:translateX(-2px);}
+    20%,80%{transform:translateX(4px);}
+    30%,50%,70%{transform:translateX(-8px);}
+    40%,60%{transform:translateX(8px);}
+  }
+
+  /* ---------- MISSION BRIEF / DECISION / SAVE / LOAD ---------- */
+  .overlay{
+    position:fixed;inset:0;background:rgba(10,20,14,.72);
+    display:flex;align-items:center;justify-content:center;z-index:70;padding:20px;
+  }
+  .overlay-card{
+    background:var(--paper);border-radius:22px;padding:26px;max-width:460px;width:100%;
+    box-shadow:0 12px 0 rgba(0,0,0,.2);
+  }
+  .overlay-card h2{font-size:1.35rem;margin-bottom:8px;}
+  .overlay-card p{line-height:1.55;color:#33402f;margin:10px 0 18px;}
+  .reward-line{font-weight:800;color:var(--earth);font-size:.9rem;}
+  .code-box{
+    width:100%;min-height:90px;border-radius:12px;padding:10px;
+    font-family:monospace;font-size:.72rem;border:2px solid #ccc;resize:vertical;
+  }
+
+  /* ---------- ENDING / DEFEAT ---------- */
+  .scene-end{
+    background:radial-gradient(ellipse at 50% 20%, var(--water), var(--forest-dark) 75%);
+    align-items:center;text-align:center;justify-content:center;
+  }
+  .scene-defeat{
+    background:radial-gradient(ellipse at 50% 20%, #5c1f1f, var(--ink) 80%);
+    align-items:center;text-align:center;justify-content:center;
+  }
+  .end-card{max-width:520px;margin:0 auto;}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important; transition:none !important;}
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+/* ===================== DATA ===================== */
+const DINOS = [
+  {id:'rex', name:'Rugido', species:'Tiranosaurio Rex', maxHp:120, atk:22, dodge:0.15, defense:0,
+   color:'#B5451B', color2:'#7A2D10',
+   desc:'Fuerza bruta y una mordida devastadora. Lento, pero cada golpe cuenta.'},
+  {id:'raptor', name:'Sombra', species:'Velocirraptor', maxHp:90, atk:16, dodge:0.35, defense:0,
+   color:'#2A6F97', color2:'#164864',
+   desc:'Rápido y escurridizo. Esquiva casi cualquier golpe, aunque resiste poco.'},
+  {id:'stego', name:'Roca', species:'Estegosaurio', maxHp:150, atk:14, dodge:0.10, defense:5,
+   color:'#8B5E34', color2:'#5C3D21',
+   desc:'Placas óseas y piel gruesa. El que más golpes aguanta en toda la isla.'}
+];
+
+const ITEM_DEFS = {
+  fruta:{name:'Fruta ancestral', desc:'Cura 25 de vida', use:'heal', value:25, icon:'🍈'},
+  amuleto:{name:'Amuleto de río', desc:'Anula por completo el próximo golpe enemigo', use:'shield', value:1, icon:'🧿'},
+  mapa:{name:'Mapa de piedra', desc:'Revela un atajo: quita un obstáculo y suma progreso', use:'skip', value:15, icon:'🗺️'},
+  garra:{name:'Garra de fuego', desc:'+10 de ataque durante el resto de la pelea', use:'boost', value:10, icon:'🔥'},
+  pocion:{name:'Poción silvestre', desc:'Cura 12 de vida', use:'heal', value:12, icon:'🧪'}
+};
+
+const ZONES = [
+  {id:'selva', name:'Selva Umbría', biome:'jungle',
+   mission:'Recuperar la fruta ancestral', reward:'fruta',
+   enemies:[{name:'Enjambre de Compys', hp:40, atk:8},{name:'Dilofosaurio curioso', hp:45, atk:9}],
+   decision:{flag:'protector',
+     text:'Encuentras un nido de huevos abandonados entre las raíces. Cuidarlos te tomará tiempo, pero llevarte uno podría servirte de provisión.',
+     yes:'Quedarte a cuidar el nido', no:'Llevarte un huevo como provisión'}},
+  {id:'rio', name:'Río Rugiente', biome:'river',
+   mission:'Rescatar a la cría atrapada en la corriente', reward:'amuleto',
+   enemies:[{name:'Suchomimus', hp:60, atk:12},{name:'Cocodrilo prehistórico', hp:55, atk:13}],
+   decision:{flag:'amable',
+     text:'Entre las rocas del río escuchas un chillido: una cría de dinosaurio desconocida está atrapada en la corriente. Ayudarla te costará tiempo y energía.',
+     yes:'Detenerte y rescatarla', no:'Seguir tu camino sin mirar atrás'}},
+  {id:'cuevas', name:'Cuevas de Cristal', biome:'caves',
+   mission:'Encontrar el mapa grabado en la piedra', reward:'mapa',
+   enemies:[{name:'Ceratosaurio ciego', hp:75, atk:15},{name:'Murciélagos gigantes', hp:65, atk:16}],
+   decision:{flag:'confio',
+     text:'Un viejo dinosaurio herido se arrastra hacia ti. Dice conocer a tu familia y te pide compartir tu comida a cambio de lo que sabe.',
+     yes:'Confiar en él y compartir tu comida', no:'Desconfiar y seguir solo'}},
+  {id:'ceniza', name:'Tierras de Ceniza', biome:'volcano',
+   mission:'Recoger la garra de fuego', reward:'garra',
+   enemies:[{name:'Carnotauro vigía', hp:90, atk:18},{name:'Dracorex de lava', hp:95, atk:17}],
+   decision:{flag:'aliado',
+     text:'Un dinosaurio rival, acorralado por la lava, te pide una alianza momentánea para cruzar juntos.',
+     yes:'Formar una alianza momentánea', no:'Rechazarlo y seguir solo'}}
+];
+
+const BOSS = {name:'Alfa, el Devorador', hp:220, atk:20};
+
+const BIOME_BG = {
+  jungle:{sky:['#8FD3C0','#2D6A4F'], ground:'#1B4332'},
+  river:{sky:['#8fd0e6','#2A6F97'], ground:'#164864'},
+  caves:{sky:['#6b6ea8','#2c1f4a'], ground:'#1c1430'},
+  volcano:{sky:['#f0a35a','#7a2d10'], ground:'#3a1408'}
+};
+
+/* ===================== STATE ===================== */
+let S = {
+  screen:'start',
+  dinoId:null,
+  hp:0, maxHp:0, atk:0, dodge:0.15, defense:0,
+  inventory:{},
+  zoneState:{},
+  currentZoneId:null,
+  explore:null,
+  flags:{amable:null, confio:null, protector:null, aliado:null},
+  combat:null,
+  atkBoost:0,
+  tempZoneDodgeBonus:0,
+  logMsg:'',
+  defeatContext:null,
+  soundOn:true
+};
+
+function resetGame(){
+  const keepSound = S.soundOn;
+  S.screen='start'; S.dinoId=null; S.hp=0; S.maxHp=0; S.atk=0; S.dodge=.15; S.defense=0;
+  S.inventory={}; S.currentZoneId=null; S.explore=null; S.combat=null; S.logMsg=''; S.defeatContext=null;
+  S.atkBoost=0; S.tempZoneDodgeBonus=0;
+  S.flags={amable:null, confio:null, protector:null, aliado:null};
+  S.zoneState={};
+  ZONES.forEach((z,i)=>{ S.zoneState[z.id] = i===0 ? 'unlocked' : 'locked'; });
+  S.soundOn = keepSound;
+}
+resetGame();
+
+function dino(){ return DINOS.find(d=>d.id===S.dinoId); }
+function zone(id){ return ZONES.find(z=>z.id===id); }
+function clamp(n,a,b){ return Math.max(a,Math.min(b,n)); }
+function rand(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+function totalItems(){ return Object.values(S.inventory).reduce((a,b)=>a+b,0); }
+function addItem(id){ S.inventory[id] = (S.inventory[id]||0)+1; }
+
+/* ===================== SOUND ===================== */
+let audioCtx = null;
+function ensureAudio(){
+  if(!audioCtx){
+    try{ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ audioCtx=null; }
+  }
+}
+function tone(ctx,t0,freq,dur,type,vol,start){
+  const o = ctx.createOscillator(); const g = ctx.createGain();
+  o.type=type; o.frequency.setValueAtTime(freq, t0+start);
+  g.gain.setValueAtTime(vol, t0+start);
+  g.gain.exponentialRampToValueAtTime(0.001, t0+start+dur);
+  o.connect(g); g.connect(ctx.destination);
+  o.start(t0+start); o.stop(t0+start+dur);
+}
+function playSound(type){
+  if(!S.soundOn) return;
+  ensureAudio();
+  if(!audioCtx) return;
+  const ctx = audioCtx; const t0 = ctx.currentTime;
+  if(type==='click') tone(ctx,t0,600,0.06,'square',0.05,0);
+  else if(type==='hit'){ tone(ctx,t0,150,0.12,'square',0.16,0); tone(ctx,t0,90,0.15,'sawtooth',0.1,0.02); }
+  else if(type==='hurt') tone(ctx,t0,120,0.2,'sawtooth',0.16,0);
+  else if(type==='heal'){ tone(ctx,t0,500,0.1,'sine',0.12,0); tone(ctx,t0,700,0.12,'sine',0.1,0.09); }
+  else if(type==='victory'){ tone(ctx,t0,440,0.12,'triangle',0.15,0); tone(ctx,t0,554,0.12,'triangle',0.15,0.12); tone(ctx,t0,659,0.22,'triangle',0.18,0.24); }
+  else if(type==='defeat'){ tone(ctx,t0,200,0.3,'sawtooth',0.14,0); tone(ctx,t0,140,0.4,'sawtooth',0.12,0.15); }
+}
+
+/* ===================== VISUAL FX ===================== */
+function floatNumber(selector, text, color){
+  const target = document.querySelector(selector);
+  if(!target) return;
+  const el = document.createElement('div');
+  el.className='float-dmg';
+  el.textContent=text;
+  el.style.color = color || '#fff';
+  target.appendChild(el);
+  setTimeout(()=>{ if(el.parentNode) el.parentNode.removeChild(el); },900);
+}
+function shakeEl(selector){
+  const el = document.querySelector(selector);
+  if(!el) return;
+  el.classList.add('shake');
+  setTimeout(()=>el.classList.remove('shake'),400);
+}
+
+/* ===================== SVG HELPERS ===================== */
+function dinoSVG(color, color2, size, extraClass){
+  return `<svg viewBox="0 0 200 160" width="${size}" class="${extraClass||''}" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="100" cy="145" rx="55" ry="10" fill="rgba(0,0,0,.25)"/>
+    <path d="M40 120 Q20 95 45 70 Q35 40 65 25 Q95 10 120 30 Q150 40 150 70 Q170 85 155 110 Q160 130 135 135 Q100 150 65 135 Q40 135 40 120 Z" fill="${color}"/>
+    <path d="M65 25 Q95 10 120 30 Q112 45 95 42 Q78 40 65 25 Z" fill="${color2}"/>
+    <path d="M120 30 L138 8 L128 34 Z" fill="${color2}"/>
+    <path d="M105 34 L118 14 L112 38 Z" fill="${color2}"/>
+    <circle cx="118" cy="34" r="6" fill="#FBF7EC"/>
+    <circle cx="120" cy="34" r="3" fill="#14241A"/>
+    <path d="M150 70 Q175 75 190 65" stroke="${color2}" stroke-width="10" fill="none" stroke-linecap="round"/>
+    <path d="M55 130 Q50 148 40 150" stroke="${color2}" stroke-width="10" fill="none" stroke-linecap="round"/>
+    <path d="M120 132 Q125 150 138 152" stroke="${color2}" stroke-width="10" fill="none" stroke-linecap="round"/>
+  </svg>`;
+}
+
+function biomeBackground(biome){
+  const b = BIOME_BG[biome] || BIOME_BG.jungle;
+  return `<svg class="zone-bg" viewBox="0 0 400 300" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+    <defs>
+      <linearGradient id="sky-${biome}" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="${b.sky[0]}"/>
+        <stop offset="100%" stop-color="${b.sky[1]}"/>
+      </linearGradient>
+    </defs>
+    <rect width="400" height="300" fill="url(#sky-${biome})"/>
+    <path d="M0 220 Q100 180 200 215 T400 200 V300 H0 Z" fill="${b.ground}" opacity="0.9"/>
+    <path d="M0 250 Q120 220 220 250 T400 240 V300 H0 Z" fill="${b.ground}"/>
+  </svg>`;
+}
+
+function barsHTML(){
+  const pct = Math.round((S.hp/S.maxHp)*100);
+  return `<div class="status-bars">
+    <div>
+      <div class="bar-label"><span>Vida</span><span>${S.hp}/${S.maxHp}</span></div>
+      <div class="bar-bg"><div class="bar-fill fill-hp" style="width:${pct}%"></div></div>
+    </div>
+  </div>`;
+}
+
+function usableItemsHtml(context){
+  const entries = Object.entries(S.inventory);
+  if(entries.length===0) return '';
+  const buttons = entries.map(([id,qty])=>{
+    const def = ITEM_DEFS[id];
+    let usable = false;
+    if(context==='explore' && (def.use==='skip' || def.use==='heal')) usable = true;
+    if(context==='combat' && (def.use==='heal' || def.use==='shield' || def.use==='boost')) usable = true;
+    const style = usable ? '' : 'opacity:.35;cursor:not-allowed;';
+    const attr = usable ? `data-action="use-item:${id}"` : 'disabled';
+    return `<button class="btn ghost item-btn" style="${style}" ${attr}>${def.icon} ${def.name} ×${qty}</button>`;
+  }).join('');
+  return `<div class="btn-row item-row">${buttons}</div>`;
+}
+
+/* ===================== RENDER ===================== */
+function render(){
+  const app = document.getElementById('app');
+  let html = '';
+  switch(S.screen){
+    case 'start': html = renderStart(); break;
+    case 'how': html = renderHow(); break;
+    case 'select': html = renderSelect(); break;
+    case 'intro': html = renderIntro(); break;
+    case 'map': html = renderMap(); break;
+    case 'zone': html = renderZone(); break;
+    case 'combat': html = renderCombat(false); break;
+    case 'boss': html = renderCombat(true); break;
+    case 'defeat': html = renderDefeat(); break;
+    case 'ending': html = renderEnding(); break;
+    default: html = renderStart();
+  }
+  const soundIcon = S.soundOn ? '🔊' : '🔇';
+  app.innerHTML = `<button class="sound-toggle" data-action="toggle-sound" title="Sonido">${soundIcon}</button>` + html;
+  window.scrollTo(0,0);
+}
+
+function renderStart(){
+  return `
+  <div class="scene-start">
+    <div class="sun"></div>
+    <svg class="parallax-hill" viewBox="0 0 400 120" preserveAspectRatio="none">
+      <path class="hill-back" d="M0 70 Q100 30 200 65 T400 55 V120 H0 Z"/>
+      <path class="hill-front" d="M0 95 Q120 55 240 90 T400 80 V120 H0 Z"/>
+    </svg>
+    <div class="logo-wrap">
+      <h1 class="logo-title">Dino <span>Rawr</span></h1>
+      <div class="logo-sub">una aventura en la isla olvidada</div>
+    </div>
+    ${dinoSVG('#B5451B','#7A2D10','min(78vw,360px)'.replace(/'/g,''),'hero-dino')}
+    <div class="start-actions btn-row">
+      <button class="btn" data-action="goto-select">Jugar</button>
+      <button class="btn ghost" data-action="goto-how">Cómo jugar</button>
+      <button class="btn ghost" data-action="show-load-overlay">Continuar con código</button>
+    </div>
+  </div>`;
+}
+
+function renderHow(){
+  return `
+  <div class="screen scene-intro">
+    <div class="card intro-card">
+      <h2>Cómo jugar</h2>
+      <p>Elige un dinosaurio y explora la isla en busca de tu familia. En cada zona podrás <strong>correr</strong>, <strong>saltar</strong> obstáculos y <strong>explorar</strong> en busca de objetos.</p>
+      <p>Cuando te encuentres con un dinosaurio enemigo, decide entre <strong>atacar</strong> o <strong>esquivar</strong>. Los objetos que consigas (pociones, amuletos, mapas) se pueden usar en el momento justo para cambiar una pelea.</p>
+      <p>Algunas decisiones cambian el rumbo de la historia y hasta te dan pequeñas ventajas más adelante. Completa las misiones para desbloquear zonas nuevas y prepárate para el jefe final.</p>
+      <div class="btn-row" style="justify-content:center;margin-top:10px;">
+        <button class="btn" data-action="goto-select">Empezar aventura</button>
+        <button class="btn secondary" data-action="back-start">Volver</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderSelect(){
+  const cards = DINOS.map(d=>{
+    const sel = S.dinoId===d.id ? 'selected' : '';
+    return `<div class="dino-card ${sel}" data-action="choose-dino:${d.id}">
+      ${dinoSVG(d.color,d.color2,120)}
+      <h3>${d.name}</h3>
+      <div class="species">${d.species}</div>
+      <p class="desc">${d.desc}</p>
+      <div class="stat-row"><span>Vida</span><span>${d.maxHp}</span></div>
+      <div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${(d.maxHp/150*100)}%;background:var(--danger)"></div></div>
+      <div class="stat-row"><span>Ataque</span><span>${d.atk}</span></div>
+      <div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${(d.atk/22*100)}%;background:var(--orange)"></div></div>
+      <div class="stat-row"><span>Agilidad</span><span>${Math.round(d.dodge*100)}%</span></div>
+      <div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${(d.dodge/0.35*100)}%;background:var(--water)"></div></div>
+    </div>`;
+  }).join('');
+  return `
+  <div class="screen scene-select">
+    <div class="screen-header"><h2 class="screen-title">Elige tu dinosaurio</h2></div>
+    <div class="dino-grid">${cards}</div>
+    <div class="select-footer">
+      <button class="btn" data-action="confirm-dino" ${S.dinoId?'':'disabled'}>Seleccionar</button>
+    </div>
+  </div>`;
+}
+
+function renderIntro(){
+  const d = dino();
+  return `
+  <div class="screen scene-intro">
+    <div class="card intro-card">
+      ${dinoSVG(d.color,d.color2,140)}
+      <h2>Antes de la tormenta</h2>
+      <p>${d.name} despierta entre la ceniza y la niebla. La noche anterior, un temblor sacudió la isla y separó a toda la manada.</p>
+      <p>Ahora solo quedan huellas confusas, un aire pesado a azufre, y un único pensamiento: encontrar a su familia, cueste lo que cueste.</p>
+      <p>La isla, tan familiar hasta ayer, hoy esconde peligros nuevos en cada rincón.</p>
+      <div class="btn-row" style="justify-content:center;margin-top:6px;">
+        <button class="btn" data-action="goto-map">Continuar</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderMap(){
+  const tiles = ZONES.map((z,i)=>{
+    const st = S.zoneState[z.id];
+    const label = st==='locked' ? 'Bloqueada' : st==='done' ? 'Completada' : 'Disponible';
+    const statusClass = st==='locked' ? 'status-locked' : st==='done' ? 'status-done' : 'status-unlocked';
+    return `<div class="zone-tile ${st}">
+      <div class="zone-num">${i+1}</div>
+      <h3>${z.name}</h3>
+      <div class="mission-line">${st==='locked' ? '???' : z.mission}</div>
+      <span class="zone-status ${statusClass}">${label}</span>
+      <div style="margin-top:12px;">
+        <button class="btn secondary" style="padding:9px 18px;font-size:.85rem;" data-action="enter-zone:${z.id}" ${st==='locked'?'disabled':''}>${st==='done'?'Revisitar':'Explorar'}</button>
+      </div>
+    </div>`;
+  }).join('');
+  const allDone = ZONES.every(z=>S.zoneState[z.id]==='done');
+  const invEntries = Object.entries(S.inventory);
+  const invRow = invEntries.length ? `<div class="btn-row" style="margin-top:10px;">${invEntries.map(([id,qty])=>`<span class="hud pill">${ITEM_DEFS[id].icon} ${ITEM_DEFS[id].name} ×${qty}</span>`).join('')}</div>` : '';
+  return `
+  <div class="screen scene-map">
+    <div class="screen-header">
+      <h2 class="screen-title">Mapa de la isla</h2>
+    </div>
+    <div class="hud">
+      <div class="pill">❤ ${S.hp}/${S.maxHp}</div>
+      <div class="pill">🎒 ${totalItems()} objetos</div>
+      <button class="btn secondary" style="padding:8px 16px;font-size:.8rem;" data-action="show-save-overlay">Guardar partida</button>
+    </div>
+    ${invRow}
+    <div class="zone-list" style="margin-top:16px;">${tiles}</div>
+    ${allDone ? `<div class="select-footer" style="margin-top:24px;"><button class="btn" data-action="goto-boss">Enfrentar al jefe final</button></div>` : ''}
+  </div>`;
+}
+
+function startExplore(zoneId){
+  const z = zone(zoneId);
+  S.currentZoneId = zoneId;
+  const enemyPick = z.enemies[rand(0,z.enemies.length-1)];
+  S.explore = {progress:0, obstaclePending:false, encounterAt: rand(40,65), enemyDefeated:false,
+    decisionShown:false, enemyPick:enemyPick, secretAvailable:false, secretUsed:false};
+  S.tempZoneDodgeBonus = 0;
+  let msg = `Entras a ${z.name}. Misión: ${z.mission}.`;
+  if(zoneId==='ceniza' && S.flags.amable===true){
+    S.tempZoneDodgeBonus = 0.1;
+    msg += ' Sientes que la cría que rescataste te dio más de lo que crees: te mueves con más confianza aquí.';
+  }
+  S.logMsg = msg;
+  S.screen='zone';
+}
+
+function renderZone(){
+  const z = zone(S.currentZoneId);
+  const ex = S.explore;
+  const secretBtn = (ex.secretAvailable && !ex.enemyDefeated) ? `<button class="btn ghost" data-action="zone-secret" style="color:var(--ink);border-color:var(--earth-dark);">Sendero secreto</button>` : '';
+  return `
+  <div class="screen scene-zone">
+    ${biomeBackground(z.biome)}
+    <div class="zone-content">
+      <div class="mission-banner">🎯 ${z.mission}</div>
+      ${barsHTML()}
+      <div class="bar-label"><span>Progreso</span><span>${clamp(ex.progress,0,100)}%</span></div>
+      <div class="bar-bg" style="margin-bottom:10px;"><div class="bar-fill fill-progress" style="width:${clamp(ex.progress,0,100)}%"></div></div>
+      <div class="zone-stage">
+        ${dinoSVG(dino().color,dino().color2,140,'player-token')}
+      </div>
+      <div class="log-line">${S.logMsg}</div>
+      ${usableItemsHtml('explore')}
+      <div class="action-grid">
+        <button class="btn" data-action="zone-run">Correr</button>
+        <button class="btn secondary" data-action="zone-jump">Saltar</button>
+        <button class="btn secondary" data-action="zone-explore-look">Explorar</button>
+        ${secretBtn}
+        <button class="btn ghost" data-action="goto-map" style="color:var(--ink);border-color:rgba(0,0,0,.25);">Volver al mapa</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function afterZoneAction(){
+  const ex = S.explore;
+  const z = zone(S.currentZoneId);
+  ex.progress = clamp(ex.progress,0,100);
+  if(!ex.enemyDefeated && ex.progress>=ex.encounterAt){
+    S.combat = {name:ex.enemyPick.name, hp:ex.enemyPick.hp, maxHp:ex.enemyPick.hp, atk:ex.enemyPick.atk, isBoss:false, shield:false};
+    S.atkBoost = 0;
+    S.screen='combat';
+    render();
+    return;
+  }
+  if(ex.progress>=100 && ex.enemyDefeated){
+    if(z.decision && !ex.decisionShown){
+      ex.decisionShown = true;
+      showDecisionOverlay(z);
+      return;
+    }
+    completeZone(z);
+    return;
+  }
+  render();
+}
+
+function completeZone(z){
+  S.zoneState[z.id]='done';
+  addItem(z.reward);
+  const idx = ZONES.findIndex(x=>x.id===z.id);
+  if(idx>=0 && idx+1<ZONES.length){
+    const next = ZONES[idx+1];
+    if(S.zoneState[next.id]==='locked') S.zoneState[next.id]='unlocked';
+  }
+  S.screen='map';
+  render();
+  showRewardOverlay(z);
+}
+
+function showRewardOverlay(z){
+  const item = ITEM_DEFS[z.reward];
+  const app = document.getElementById('app');
+  const ov = document.createElement('div');
+  ov.className='overlay';
+  ov.innerHTML = `<div class="overlay-card">
+    <h2>¡Misión completada!</h2>
+    <p>${z.name}: ${z.mission}</p>
+    <p class="reward-line">${item.icon} Obtuviste: ${item.name} — ${item.desc}</p>
+    <div class="btn-row" style="justify-content:center;"><button class="btn" data-action="close-overlay">Continuar</button></div>
+  </div>`;
+  app.appendChild(ov);
+}
+
+function showDecisionOverlay(z){
+  render();
+  const app = document.getElementById('app');
+  const d = z.decision;
+  const overlay = document.createElement('div');
+  overlay.className='overlay';
+  overlay.innerHTML = `<div class="overlay-card">
+    <h2>Una decisión</h2>
+    <p>${d.text}</p>
+    <div class="btn-row" style="flex-direction:column;">
+      <button class="btn" data-action="decision:${d.flag}:true">${d.yes}</button>
+      <button class="btn secondary" data-action="decision:${d.flag}:false">${d.no}</button>
+    </div>
+  </div>`;
+  app.appendChild(overlay);
+}
+
+function renderCombat(isBoss){
+  const c = S.combat;
+  const d = dino();
+  const enemyPct = Math.round((c.hp/c.maxHp)*100);
+  const bgBiome = isBoss ? 'volcano' : (zone(S.currentZoneId) ? zone(S.currentZoneId).biome : 'jungle');
+  return `
+  <div class="screen scene-zone">
+    ${biomeBackground(bgBiome)}
+    <div class="zone-content">
+      <div class="mission-banner">${isBoss ? '👑 Enfrentamiento final' : '⚔ Enfrentamiento'}</div>
+      ${barsHTML()}
+      <div class="combat-vs">
+        <div class="combatant" id="player-combatant">
+          ${dinoSVG(d.color,d.color2,100)}
+          <h4>${d.name}</h4>
+        </div>
+        <div class="combatant" id="enemy-combatant">
+          <div style="font-size:54px;line-height:1;">🦖</div>
+          <h4>${c.name}</h4>
+          <div class="bar-bg"><div class="bar-fill fill-enemy" style="width:${enemyPct}%"></div></div>
+          <div style="color:var(--paper);font-size:.75rem;margin-top:2px;">${c.hp}/${c.maxHp}</div>
+        </div>
+      </div>
+      <div class="log-line">${S.logMsg}</div>
+      ${usableItemsHtml('combat')}
+      <div class="action-grid">
+        <button class="btn" data-action="combat-attack">Atacar</button>
+        <button class="btn secondary" data-action="combat-dodge">Esquivar</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function combatAction(kind){
+  const c = S.combat;
+  const d = dino();
+  let msg = '';
+  if(kind==='attack'){
+    const dmg = Math.max(3, d.atk + (S.atkBoost||0) + rand(-4,4));
+    c.hp = clamp(c.hp - dmg, 0, c.maxHp);
+    msg = `Atacas a ${c.name} y le causas ${dmg} de daño. `;
+    floatNumber('#enemy-combatant','-'+dmg,'#ffdd55');
+    playSound('hit');
+  } else {
+    msg = `Te preparas para esquivar. `;
+  }
+  if(c.hp<=0){
+    onEnemyDefeated();
+    return;
+  }
+  if(c.shield){
+    msg += `${c.name} ataca, pero tu protección absorbe el golpe por completo.`;
+    c.shield = false;
+    playSound('heal');
+  } else {
+    const dodgeChance = clamp((kind==='dodge' ? d.dodge+0.35 : d.dodge) + (S.tempZoneDodgeBonus||0), 0, 0.9);
+    const dodged = Math.random() < dodgeChance;
+    if(dodged){
+      msg += `¡${c.name} ataca pero esquivas a tiempo!`;
+    } else {
+      let dmg = Math.max(1, c.atk + rand(-3,3) - d.defense);
+      S.hp = clamp(S.hp - dmg, 0, S.maxHp);
+      msg += `${c.name} contraataca y te quita ${dmg} de vida.`;
+      floatNumber('#player-combatant','-'+dmg,'#ff6b6b');
+      playSound('hurt');
+      shakeEl('.zone-content');
+    }
+  }
+  S.logMsg = msg;
+  if(S.hp<=0){
+    S.defeatContext = {type: c.isBoss?'boss':'zone'};
+    S.screen='defeat';
+    playSound('defeat');
+    render();
+    return;
+  }
+  render();
+}
+
+function onEnemyDefeated(){
+  const wasBoss = S.combat.isBoss;
+  S.logMsg = `¡Has derrotado a ${S.combat.name}!`;
+  S.combat = null;
+  S.atkBoost = 0;
+  playSound('victory');
+  if(wasBoss){
+    S.screen='ending';
+    render();
+    return;
+  }
+  if(S.explore){ S.explore.enemyDefeated = true; }
+  S.screen='zone';
+  render();
+}
+
+function useItem(id){
+  const def = ITEM_DEFS[id];
+  if(!S.inventory[id]) return;
+  S.inventory[id]--;
+  if(S.inventory[id]<=0) delete S.inventory[id];
+
+  if(def.use==='heal'){
+    S.hp = clamp(S.hp+def.value,0,S.maxHp);
+    S.logMsg = `Usas ${def.name} y recuperas ${def.value} de vida.`;
+    playSound('heal');
+    render();
+    return;
+  }
+  if(def.use==='shield' && S.combat){
+    S.combat.shield = true;
+    S.logMsg = `Usas ${def.name}: el próximo golpe enemigo no te hará daño.`;
+    playSound('heal');
+    render();
+    return;
+  }
+  if(def.use==='boost' && S.combat){
+    S.atkBoost = (S.atkBoost||0) + def.value;
+    S.logMsg = `Usas ${def.name}: tu ataque aumenta durante esta pelea.`;
+    playSound('heal');
+    render();
+    return;
+  }
+  if(def.use==='skip' && S.explore){
+    S.explore.obstaclePending = false;
+    S.explore.progress = clamp(S.explore.progress+def.value,0,100);
+    S.logMsg = `Usas ${def.name} y encuentras un atajo.`;
+    playSound('heal');
+    afterZoneAction();
+    return;
+  }
+  render();
+}
+
+function renderDefeat(){
+  return `
+  <div class="screen scene-defeat">
+    <div class="card end-card">
+      <h2>Has caído...</h2>
+      <p style="line-height:1.5;margin:14px 0;">La isla es implacable, pero tu historia no termina aquí. Recupera fuerzas e inténtalo de nuevo.</p>
+      <div class="btn-row" style="justify-content:center;">
+        <button class="btn" data-action="retry-after-defeat">Reintentar</button>
+        <button class="btn secondary" data-action="return-map-after-defeat">Volver al mapa</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function endingContent(){
+  const amable = S.flags.amable;
+  const confio = S.flags.confio;
+  let base;
+  if(amable && confio){
+    base = {title:'Reunión y manada', text:'Gracias a la cría que rescataste y al viejo dinosaurio en quien confiaste, descubres el camino hacia un valle escondido: allí, tu familia sobrevivió al temblor. Junto a los nuevos amigos que hiciste en el camino, forman una manada más grande que nunca.'};
+  } else if(amable && !confio){
+    base = {title:'El guardián solitario', text:'Encuentras a tu familia sana y salva, escondida cerca del volcán. Pero el viaje te ha cambiado: decides quedarte como guardián silencioso de la isla, protegiendo a quienes la habitan, cerca pero a su manera.'};
+  } else if(!amable && confio){
+    base = {title:'El sabio errante', text:'Tu familia partió de la isla hace tiempo, siguiendo rutas que ya no puedes rastrear. Pero el viejo dinosaurio que ayudaste se convierte en tu nuevo compañero: juntos emprenden un nuevo camino, con otra clase de familia.'};
+  } else {
+    base = {title:'El rugido silencioso', text:'Al llegar a la guarida final, comprendes que tu familia no sobrevivió al temblor. El dolor es profundo, pero juras en su nombre proteger a los demás dinosaurios de la isla de cualquier peligro que llegue a sus costas.'};
+  }
+  let extra = '';
+  if(S.flags.protector===true){
+    extra += ' El nido que cuidaste en la selva ya son crías fuertes, y aún recuerdan tu cuidado.';
+  }
+  if(S.flags.aliado===true){
+    extra += ' Tu antiguo rival de las tierras de ceniza ronda cerca, ahora como un aliado inesperado.';
+  }
+  return {title: base.title, text: base.text + extra};
+}
+
+function renderEnding(){
+  const e = endingContent();
+  return `
+  <div class="screen scene-end">
+    <div class="card end-card">
+      ${dinoSVG(dino().color,dino().color2,150)}
+      <h2>${e.title}</h2>
+      <p style="line-height:1.6;margin:14px 0;">${e.text}</p>
+      <div class="btn-row" style="justify-content:center;">
+        <button class="btn" data-action="play-again">Jugar de nuevo</button>
+        <button class="btn secondary" data-action="go-start-from-end">Volver al inicio</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ===================== SAVE / LOAD (sin almacenamiento del navegador) ===================== */
+function encodeSave(){
+  const data = {
+    dinoId:S.dinoId, hp:S.hp, maxHp:S.maxHp, atk:S.atk, dodge:S.dodge, defense:S.defense,
+    inventory:S.inventory, zoneState:S.zoneState, flags:S.flags
+  };
+  return btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+}
+function loadSave(code){
+  try{
+    const json = decodeURIComponent(escape(atob(code)));
+    const data = JSON.parse(json);
+    if(!data || !data.dinoId) return false;
+    S.dinoId = data.dinoId; S.hp = data.hp; S.maxHp = data.maxHp; S.atk = data.atk;
+    S.dodge = data.dodge; S.defense = data.defense;
+    S.inventory = data.inventory || {};
+    S.zoneState = data.zoneState || {};
+    S.flags = data.flags || {amable:null,confio:null,protector:null,aliado:null};
+    S.currentZoneId = null; S.explore = null; S.combat = null; S.defeatContext = null;
+    S.atkBoost = 0; S.tempZoneDodgeBonus = 0;
+    S.screen = 'map';
+    return true;
+  }catch(e){ return false; }
+}
+
+function showSaveOverlay(){
+  const code = encodeSave();
+  render();
+  const app = document.getElementById('app');
+  const ov = document.createElement('div');
+  ov.className='overlay';
+  ov.innerHTML = `<div class="overlay-card">
+    <h2>Tu código de partida</h2>
+    <p>Copia este código y guárdalo en algún lado. Podrás pegarlo desde la pantalla de inicio para continuar exactamente donde ibas.</p>
+    <textarea id="save-code-box" class="code-box" readonly>${code}</textarea>
+    <div class="btn-row" style="margin-top:14px;">
+      <button class="btn" data-action="copy-save-code">Copiar código</button>
+      <button class="btn secondary" data-action="close-overlay">Cerrar</button>
+    </div>
+  </div>`;
+  app.appendChild(ov);
+}
+
+function showLoadOverlay(){
+  render();
+  const app = document.getElementById('app');
+  const ov = document.createElement('div');
+  ov.className='overlay';
+  ov.innerHTML = `<div class="overlay-card">
+    <h2>Continuar partida</h2>
+    <p>Pega aquí el código que guardaste antes.</p>
+    <textarea id="load-code-box" class="code-box" placeholder="Pega tu código aquí"></textarea>
+    <div class="btn-row" style="margin-top:14px;">
+      <button class="btn" data-action="confirm-load-code">Cargar</button>
+      <button class="btn secondary" data-action="close-overlay">Cerrar</button>
+    </div>
+  </div>`;
+  app.appendChild(ov);
+}
+
+/* ===================== EVENTS ===================== */
+document.addEventListener('click', function(e){
+  const el = e.target.closest('[data-action]');
+  if(!el) return;
+  const action = el.getAttribute('data-action');
+  const parts = action.split(':');
+  const name = parts[0], arg1 = parts[1], arg2 = parts[2];
+
+  playSound('click');
+
+  switch(name){
+    case 'toggle-sound': S.soundOn = !S.soundOn; render(); break;
+    case 'goto-select': S.screen='select'; render(); break;
+    case 'goto-how': S.screen='how'; render(); break;
+    case 'back-start': S.screen='start'; render(); break;
+    case 'choose-dino': S.dinoId = arg1; render(); break;
+    case 'confirm-dino': {
+      const d = dino();
+      S.maxHp = d.maxHp; S.hp = d.maxHp; S.atk = d.atk; S.dodge = d.dodge; S.defense = d.defense;
+      S.screen='intro'; render();
+      break;
+    }
+    case 'goto-map': S.screen='map'; render(); break;
+    case 'enter-zone': startExplore(arg1); render(); break;
+    case 'zone-run': {
+      const ex = S.explore;
+      const gain = rand(10,18);
+      ex.progress += gain;
+      if(!ex.obstaclePending){
+        ex.obstaclePending = Math.random() < 0.35;
+        S.logMsg = ex.obstaclePending ? 'Corres a toda velocidad... ¡un tronco caído bloquea el paso!' : `Avanzas rápido por el terreno (+${gain}% progreso).`;
+      } else {
+        S.logMsg = 'Sigues avanzando, pero el obstáculo sigue ahí. Quizás debas saltar.';
+      }
+      afterZoneAction();
+      break;
+    }
+    case 'zone-jump': {
+      const ex = S.explore;
+      if(ex.obstaclePending){
+        ex.obstaclePending = false;
+        ex.progress += 8;
+        S.logMsg = '¡Saltas justo a tiempo y superas el obstáculo!';
+      } else {
+        ex.progress += 4;
+        S.logMsg = 'Das un salto ágil para otear el terreno.';
+      }
+      afterZoneAction();
+      break;
+    }
+    case 'zone-explore-look': {
+      const ex = S.explore;
+      ex.progress += 6;
+      if(Math.random() < 0.4){
+        addItem('pocion');
+        S.logMsg = 'Rebuscas entre la maleza y encuentras una poción silvestre.';
+      } else {
+        S.logMsg = 'Exploras la zona con cuidado, pero no hay nada por aquí.';
+      }
+      if(!ex.secretUsed && !ex.secretAvailable && !ex.enemyDefeated && Math.random() < 0.3){
+        ex.secretAvailable = true;
+        S.logMsg += ' De reojo notas un sendero escondido entre la maleza...';
+      }
+      afterZoneAction();
+      break;
+    }
+    case 'zone-secret': {
+      const ex = S.explore;
+      const dmg = rand(10,20);
+      S.hp = clamp(S.hp-dmg,0,S.maxHp);
+      ex.enemyDefeated = true;
+      ex.secretAvailable = false;
+      ex.secretUsed = true;
+      addItem('pocion');
+      S.logMsg = `Tomas el sendero secreto. Te raspas contra las rocas (-${dmg} de vida), pero evitas al enemigo y encuentras una poción escondida.`;
+      playSound('hurt');
+      if(S.hp<=0){
+        S.defeatContext = {type:'zone'};
+        S.screen='defeat';
+        playSound('defeat');
+        render();
+        break;
+      }
+      ex.progress = clamp(ex.progress+20,0,100);
+      afterZoneAction();
+      break;
+    }
+    case 'use-item': useItem(arg1); break;
+    case 'decision': {
+      const flag = arg1, value = (arg2 === 'true');
+      S.flags[flag] = value;
+      if(flag==='protector' && value===true){
+        S.maxHp += 10;
+        S.hp = clamp(S.hp+10,0,S.maxHp);
+      }
+      const overlay = document.querySelector('.overlay');
+      if(overlay) overlay.remove();
+      completeZone(zone(S.currentZoneId));
+      break;
+    }
+    case 'combat-attack': combatAction('attack'); break;
+    case 'combat-dodge': combatAction('dodge'); break;
+    case 'goto-boss': {
+      S.combat = {name:BOSS.name, hp:BOSS.hp, maxHp:BOSS.hp, atk:BOSS.atk, isBoss:true, shield:false};
+      S.atkBoost = 0;
+      S.hp = S.maxHp;
+      let bonusLog = '';
+      if(S.flags.confio===true){
+        S.combat.shield = true;
+        bonusLog += ' Recuerdas la advertencia del viejo dinosaurio: estás listo para esquivar su primer golpe sin daño.';
+      }
+      if(S.flags.aliado===true){
+        const dmg = 20;
+        S.combat.hp = clamp(S.combat.hp-dmg,0,S.combat.maxHp);
+        bonusLog += ` Tu antiguo aliado de las tierras de ceniza aparece un instante y golpea a ${BOSS.name} antes de perderse entre el humo (-${dmg} de vida al jefe).`;
+      }
+      S.logMsg = `${BOSS.name} emerge entre la ceniza. Es tu último desafío.${bonusLog}`;
+      S.screen='boss';
+      render();
+      break;
+    }
+    case 'retry-after-defeat': {
+      S.hp = Math.round(S.maxHp*0.6);
+      if(S.defeatContext && S.defeatContext.type==='boss'){
+        S.combat = {name:BOSS.name, hp:BOSS.hp, maxHp:BOSS.hp, atk:BOSS.atk, isBoss:true, shield:false};
+        S.atkBoost = 0;
+        S.screen='boss';
+      } else if(S.combat){
+        S.combat.hp = S.combat.maxHp;
+        S.atkBoost = 0;
+        S.screen = 'combat';
+      } else if(S.currentZoneId){
+        S.screen='zone';
+      } else {
+        S.screen='map';
+      }
+      S.logMsg = 'Recuperas fuerzas y vuelves a intentarlo.';
+      render();
+      break;
+    }
+    case 'return-map-after-defeat': {
+      S.hp = S.maxHp;
+      S.combat = null;
+      S.explore = null;
+      S.currentZoneId = null;
+      S.atkBoost = 0;
+      S.tempZoneDodgeBonus = 0;
+      S.screen='map';
+      render();
+      break;
+    }
+    case 'show-save-overlay': showSaveOverlay(); break;
+    case 'show-load-overlay': showLoadOverlay(); break;
+    case 'close-overlay': {
+      const ov = document.querySelector('.overlay');
+      if(ov) ov.remove();
+      break;
+    }
+    case 'copy-save-code': {
+      const box = document.getElementById('save-code-box');
+      if(box){
+        box.select();
+        box.setSelectionRange(0,999999);
+        try{ document.execCommand('copy'); }catch(err){}
+        if(navigator.clipboard && navigator.clipboard.writeText){
+          navigator.clipboard.writeText(box.value).catch(()=>{});
+        }
+        el.textContent = '¡Copiado!';
+        setTimeout(()=>{ el.textContent = 'Copiar código'; },1500);
+      }
+      break;
+    }
+    case 'confirm-load-code': {
+      const box = document.getElementById('load-code-box');
+      const code = box ? box.value.trim() : '';
+      const ok = code && loadSave(code);
+      if(ok){
+        const ov = document.querySelector('.overlay');
+        if(ov) ov.remove();
+        render();
+      } else {
+        const p = document.querySelector('.overlay-card p');
+        if(p) p.textContent = 'Ese código no parece válido. Revisa que lo hayas copiado completo.';
+      }
+      break;
+    }
+    case 'play-again': resetGame(); render(); break;
+    case 'go-start-from-end': resetGame(); render(); break;
+  }
+});
+
+render();
+</script>
+</body>
+</html>
